@@ -1,19 +1,16 @@
 Sass Builder
 ============
 
-Sass Builder is a SASS compiler that reads a config file (.sassbuilder-config) stored in a sass/scss source folder. It is a JSON file that sets .css output folder and SASS flags [cache, style, debug, line numbers, line comments].
+Sass Builder is a SASS compiler plugin for Sublime Text 2/3. It utilizes a per-directory config file `.sassbuilder-config.json`, which is stored in the sass/scss source directory, to set the .css output folder, SASS flags [cache, style, debug, line numbers, line comments], and compiler preference.
 
-The plugin works on post save of a .sass/.scss file in Sublime Text.
+Sass Builder now supports both the externally installed `sass` Ruby front-end and the `sassc` C++ front-end. The latter doesn't require any outside dependencies and can run significantly faster, but you are (at the present time) more likely to encounter bugs in the implementation.
 
-SassC Compatibility
-===================
-
-The fork [blitzrk/SassBuilder-SassC](https://github.com/blitzrk/SassBuilder-SassC) provides the `sassc` binary through a dependency on [blitzrk/sublime-sassc](https://github.com/blitzrk/sublime-sassc) and introduces the (default) option to use either the `sass` or `sassc` compiler.
+The plugin works on post save of a .sass/.scss file in Sublime Text. Future versions will utilize Sublime's own build system manager.
 
 Config
 ======
 
-`project_path` has be added to this to allow for scanning in the entire project path when partials are saved.
+`project_path` allows for scanning the entire project path for partials.
 
 * Automatically runs on save.
 * Create .sassbuilder-config files with ease
@@ -23,11 +20,11 @@ Config
 
 `.sassbuilder-config.json`:
 
-```json
+```js
 {
     "project_path": "/project/path",
     "output_path": "/project/path/css",
-	"compiler": "sassc"
+    "compiler": "sassc", // or "sass"
     "options": {
         "cache":         true,
         "debug":         false,

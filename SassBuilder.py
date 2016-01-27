@@ -3,6 +3,7 @@ import sublime, sublime_plugin
 import codecs
 import json
 import os
+import stat
 import re
 import sys
 
@@ -33,7 +34,11 @@ def which_syspath(executable):
     for path in sys.path:
         fpath = os.path.join(path, executable)
 
-        if os.path.isfile(fpath) and os.access(fpath, os.X_OK):
+        if os.path.isfile(fpath):
+            if not os.access(fpath, os.X_OK):
+                mode = os.stat(fpath).st_mode
+                os.chmod(fpath, mode | stat.S_IEXEC)
+
             return fpath
 
     if os.name == 'nt' and not executable.endswith('.exe'):
