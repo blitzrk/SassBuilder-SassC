@@ -4,6 +4,7 @@ import codecs
 import json
 import os
 import re
+import sys
 
 from functools import partial
 from threading import Thread
@@ -26,6 +27,19 @@ def which(executable):
         return which('{}.exe'.format(executable))
 
     return None
+
+
+def which_syspath(executable):
+    for path in sys.path:
+        fpath = os.path.join(path, executable)
+
+        if os.path.isfile(fpath) and os.access(fpath, os.X_OK):
+            return fpath
+
+    if os.name == 'nt' and not executable.endswith('.exe'):
+        return which_syspath('{}.exe'.format(executable))
+
+    return executable
 
 
 def path_info(path):
@@ -110,7 +124,9 @@ def compile_sass(files, settings):
 
         path = os.path.join(srcp, name)
 
-        sass = 'sass --update \'{0}\':\'{1}\' --stop-on-error --trace {2} ' \
+        compiler = which_syspath(settings.get('compiler', 'sass'))
+
+        sass = '{compiler} --update \'{0}\':\'{1}\' --stop-on-error --trace {2} ' \
                '--style {3}'
 
         rules = []
@@ -130,7 +146,8 @@ def compile_sass(files, settings):
         rules = ' '.join(rules)
 
         sass = sass.format(info['path'], path, rules,
-                           settings['options']['style'])
+                           settings['options']['style'],
+                           compiler=compiler)
 
         sass = Popen(sass, shell=True, cwd=info['root'], stdout=PIPE, stderr=PIPE)
 

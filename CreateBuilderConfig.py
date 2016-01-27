@@ -3,8 +3,9 @@ import sublime, sublime_plugin
 import os
 
 skeleton = '''{
-    "project_path": "/path/to/scss",
+	"project_path": "/path/to/scss",
 	"output_path": "/path/to/css",
+	"compiler": "sassc",
 	"options": {
 		"cache":         true,
 		"debug":         true,
@@ -26,11 +27,9 @@ class SassBuilderCreateCommand(sublime_plugin.WindowCommand):
 						f.write(skeleton)
 
 					view = self.window.open_file(filename)
-					view.set_syntax_file('Packages/Javascript/JSON.tmLanguage')
 		else:
 			view = self.window.new_file()
 			view.settings().set('default_dir', self.window.folders()[0])
-			view.set_syntax_file('Packages/Javascript/JSON.tmLanguage')
-			view.set_name('.sassbuilder-config')
+			view.set_name('.sassbuilder-config.json')
 
 			view.run_command('insert_snippet', {'contents': skeleton})
