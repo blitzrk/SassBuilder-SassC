@@ -25,7 +25,7 @@ def which(executable):
             return fpath
 
     if os.name == 'nt' and not executable.endswith('.exe'):
-        return which('{}.exe'.format(executable))
+        return which('{0}.exe'.format(executable))
 
     return None
 
@@ -42,7 +42,7 @@ def which_syspath(executable):
             return fpath
 
     if os.name == 'nt' and not executable.endswith('.exe'):
-        return which_syspath('{}.exe'.format(executable))
+        return which_syspath('{0}.exe'.format(executable))
 
     return executable
 
@@ -67,13 +67,13 @@ def find_files(pattern, path):
                     if any(pattern.search(line) for line in f):
                         found.append(os.path.join(root, fname))
                         break
-    
+
     return found
 
 
 def grep_files(pattern, path):
     path = os.path.realpath(path)
-    grep = '''grep -E "{}" * -lr'''.format(pattern)
+    grep = '''grep -E "{0}" * -lr'''.format(pattern)
 
     proc = Popen(grep, shell=True, cwd=path, stdout=PIPE, stderr=PIPE)
 
@@ -96,7 +96,7 @@ def grep_files(pattern, path):
 
 
 def get_partial_files(info, project_path):
-    pattern = '''@import.*{}'''.format(info['name'][1:])
+    pattern = '''@import.*{0}'''.format(info['name'][1:])
 
     if which('grep'):
         return grep_files(pattern, project_path)
@@ -119,46 +119,50 @@ def load_settings(project_path):
         return None
 
 
+def defaultFlags(compiler):
+    if compiler.endswith('sass'):
+        return ['--stop-on-error', '--trace']
+    elif compiler.endswith('sassc'):
+        return []
+    else:
+        sublime.error_message("{0} is not a valid compiler option".format(compiler))
+
+
+def toFlags(options):
+    flags = []
+    for key, value in options.items():
+        if value is True:
+            flags.append('--{0}'.format(key))
+        elif value is not False:
+            flags.append('--{0}={1}'.format(key, value))
+
+    return flags
+
+
 def compile_sass(files, settings):
     compiled_files = []
     for f in files:
         info = path_info(f)
+        input = info['path']
 
-        srcp = os.path.join(info['root'], settings['output_path'])
-        name = '.'.join([info['name'], 'css'])
+        srcPath = os.path.join(info['root'], settings['output_path'])
+        outputName = '.'.join([info['name'], 'css'])
 
-        path = os.path.join(srcp, name)
+        output = os.path.join(srcPath, outputName)
 
         compiler = which_syspath(settings.get('compiler', 'sass'))
 
-        sass = '{compiler} --update \'{0}\':\'{1}\' --stop-on-error --trace {2} ' \
-               '--style {3}'
+        flags = defaultFlags(compiler) + toFlags(settings['options'])
 
-        rules = []
+        command = '{compiler} {flags} {input} {output}'.format(
+                compiler=compiler, flags=' '.join(flags), input=input, output=output)
+        print(command)
 
-        if not settings['options']['cache']:
-            rules.append('--no-cache')
-
-        if settings['options']['debug']:
-            rules.append('--debug-info')
-
-        if settings['options']['line-comments']:
-            rules.append('--line-comments')
-
-        if settings['options']['line-numbers']:
-            rules.append('--line-numbers')
-
-        rules = ' '.join(rules)
-
-        sass = sass.format(info['path'], path, rules,
-                           settings['options']['style'],
-                           compiler=compiler)
-
-        sass = Popen(sass, shell=True, cwd=info['root'], stdout=PIPE, stderr=PIPE)
+        sass = Popen(command, shell=True, cwd=info['root'], stdout=PIPE, stderr=PIPE)
 
         out, err = sass.communicate()
         if out:
-            compiled_files.append(name)
+            compiled_files.append(outputName)
 
         if err:
             print(err)
