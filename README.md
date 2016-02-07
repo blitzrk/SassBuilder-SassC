@@ -1,3 +1,27 @@
+# *****DEPRECATED***** 
+
+Please check out [Libsass Build](https://github.com/blitzrk/sublime_libsass). It uses sassc exclusively and has **no external dependencies**!!! It is also listed in Package Control.
+
+This was a useful experiment, which I will keep for reflection, but its ultimate contribution was informing how I went about building [Libsass Build](https://github.com/blitzrk/sublime_libsass) from scratch.
+
+Use [Libsass Build](https://github.com/blitzrk/sublime_libsass).
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
 Sass Builder
 ============
 
